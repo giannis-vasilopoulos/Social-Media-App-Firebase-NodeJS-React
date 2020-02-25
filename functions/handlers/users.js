@@ -4,7 +4,11 @@ const firebaseConfig = config;
 const firebase = require("firebase");
 firebase.initializeApp(firebaseConfig);
 
-const { validateSignupData, validateLoginData } = require("../util/validators");
+const {
+  validateSignupData,
+  validateLoginData,
+  reduceUserDetails
+} = require("../util/validators");
 
 exports.signup = (request, response) => {
   const newUser = {
@@ -91,6 +95,20 @@ exports.login = (request, response) => {
           .json({ message: "Invalid Credentials. Please try again." });
       }
       return response.status(500).json({ error: err.code });
+    });
+};
+
+exports.addUserDetails = (request, response) => {
+  let userDetails = reduceUserDetails(request.body);
+
+  db.doc(`/users/${request.user.handle}`)
+    .update(userDetails)
+    .then(() => {
+      return response.json({ message: "Details added successfully" });
+    })
+    .catch(err => {
+      console.error(err);
+      return response.status.json({ error: err.code });
     });
 };
 
